@@ -1,7 +1,7 @@
 import { test, expect, chromium } from '@playwright/test';
 
 test('login to ServiceNow', async () => {
-  test.setTimeout(60000)
+  test.setTimeout(100000)
   const browser = await chromium.launch({
     channel: 'chrome',
     headless: false
@@ -9,19 +9,19 @@ test('login to ServiceNow', async () => {
 
   const context = await browser.newContext();
   const page = await context.newPage();
-
+  const fs = require('fs');
   // Step 1: Navigate to the login page
   await page.goto('https://uniceftest.service-now.com/mp', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1000);
 
-  // Step 2: Fill in the username
+  const credentials = JSON.parse(fs.readFileSync('TestData.json', 'utf8'));
   await expect(page.locator('input[name="username"]')).toBeVisible({ timeout: 10000 });
-  await page.fill('input[name="username"]', 'QA_RAS_hrbp_1');
+  await page.fill('input[name="username"]', credentials.username);
   await page.waitForTimeout(1000);
 
-  // Step 3: Fill in the password
+  // Step 4: Fill in the password
   await expect(page.locator('input[name="password"]')).toBeVisible({ timeout: 10000 });
-  await page.fill('input[name="password"]', 'Hrbp@123');
+  await page.fill('input[name="password"]', credentials.password);
   await page.waitForTimeout(1000);
 
   // Step 4: Click on the login button
@@ -41,7 +41,6 @@ test('login to ServiceNow', async () => {
   await page.waitForTimeout(1000);
 
   // Step 8: Fill in "Vacancy Announcement Duration"
-//   await expect(page.locator('input[name="vaccancy_announcement_duration_in_days"]')).toBeVisible({ timeout: 10000 });
   await page.fill('input[name="vaccancy_announcement_duration_in_days"]', '10');
   await page.waitForTimeout(1000);
 
@@ -55,9 +54,9 @@ test('login to ServiceNow', async () => {
 
   // Step 10: Fill in "Position Number"
 //   await expect(page.locator('input[name="position_number"]')).toBeVisible({ timeout: 10000 });
-  await page.fill('input[name="position_number"]', '00123944');
+  await page.fill('input[name="position_number"]', '00013022');
   await page.waitForTimeout(1000);
-  console.log('Step: Clicking the "Contacts" label...');
+ console.log('Step: Clicking the "Contacts" label...');
   const labelSelector = '//label[contains(@class, "accordion-label") and @id="contacts"]';
   await page.click(labelSelector);
 
@@ -74,8 +73,7 @@ test('login to ServiceNow', async () => {
   await page.click('//*[@id="s2id_sp_formfield_hiring_manager"]/a/span[2]/b');
   await page.fill('//*[@id="s2id_autogen22_search"]', 'Shruti Rastogi');
   await page.click('//div[text()="Shruti Rastogi"]');
-
-  await page.waitForTimeout(7000);
+ await page.waitForTimeout(7000);
 
   console.log('Step: Clicking the va_job_specification label...');
   const va_job_labelSelector = '//*[@id="va_job_specification"]';
@@ -98,35 +96,69 @@ test('login to ServiceNow', async () => {
   await page.waitForTimeout(7000);
   console.log('File upload completed successfully.');
 
-  await page.click('//*[@id="s2id_autogen24"]');
-  await page.fill('//*[@id="s2id_autogen24"]', 'Accounting');
+    const iframeSelector = '(//iframe[@title="Rich Text Area" and @class = "tox-edit-area__iframe"])[2]';
+
+    // Wait for the iframe to be available in the DOM by the combined selector and then switch to it
+    const iframeElement = await page.waitForSelector(iframeSelector);
+    const frame = await iframeElement.contentFrame();
+
+    if (frame) {
+        // Now you can interact with elements within the iframe
+        // Example: Clicking a button inside the iframe
+        await frame.click('button-selector-inside-iframe'); // Replace 'button-selector-inside-iframe' with the actual selector
+        console.log('Interaction within iframe successful.');
+    } else {
+        console.log('Failed to access the iframe content.');
+    }
+
+  await page.click('//*[@id="s2id_sp_formfield_areas_of_education"]/ul/li/input');
+    console.log('Clicked on Accounting dropdown')
+  await page.fill('//*[@id="s2id_sp_formfield_areas_of_education"]/ul/li/input', 'Accounting');
+    console.log('Filled on Accounting')
   await page.waitForTimeout(5000);
   await page.click('//div[text()="Accounting"]');
   await page.waitForTimeout(5000);
   console.log('Clicked on Accounting')
 
   await page.click('//*[@id="s2id_sp_formfield_areas_of_work"]/ul/li/input');
+    console.log('Clicked on Accounting and Auditing')
   await page.fill('//*[@id="s2id_sp_formfield_areas_of_work"]/ul/li/input', 'Accounting and Auditing');
-    await page.waitForTimeout(2000);
+    console.log('Filled on Accounting and Auditing')
+  await page.waitForTimeout(2000);
   await page.click('//div[text()="Accounting and Auditing"]');
   await page.waitForTimeout(3000);
   console.log('Clicked on Accounting and Auditing')
 
+  await page.waitForTimeout(7000);
   await page.click('//*[@id="va_minimum_requirements_desirables"]');
+    console.log('Clicked on va_minimum_requirements_desirables')
   await page.waitForTimeout(2000);
-  await page.click('//*[@id="s2id_sp_formfield_for_every_child"]');
-  await page.fill('//*[@id="s2id_autogen17_search"]', 'a hero');
-    await page.waitForTimeout(5000);
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(3000);
-  console.log('Clicked on child tagline')
 
+  console.log('Setting For every child, [insert tagline]....')
+  await page.click('//*[@id="s2id_sp_formfield_for_every_child"]');
+ await page.fill('//label[text()="For every child, [insert tagline]"]/following-sibling::input', 'a hero');
+  await page.click('//ul[@class="select2-results" and @role="listbox"]//div[@role="option" and contains(., "a hero")]');
+  console.log('Setting For every child, [insert tagline].... COMPLETED')
+
+  await page.waitForTimeout(8000);
   const full_vacancy_announcement_text = '//*[@id="full_vacancy_announcement_text"]';
+  console.log('clicking... on  full_vacancy_announcement_text');
   await page.click(full_vacancy_announcement_text);
-  console.log('Entered full_vacancy_announcement_text')
-//   await page.waitForTimeout(7000);
-//   const checkbox = page.locator('//input[@type="checkbox" and @id="sp_formfield_remarks_checkbox"]');
-//   await checkbox.check();
+  console.log('clicked on  full_vacancy_announcement_text');
+
+
+await page.evaluate(() => {
+    const checkbox = document.getElementById('sp_formfield_remarks_checkbox');
+    if (checkbox && !checkbox.checked) {
+        checkbox.click();
+    }
+});
+console.log('Clicked on Acknowledgement checkbox');
+
+
+  const submit_button = '(//button[text()="Submit"])[2]'
+  await page.click(submit_button);
+  console.log('clicked on ssubmit button')
 
   await page.waitForTimeout(20000);
 });
