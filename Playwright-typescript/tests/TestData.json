@@ -1,4 +1,13 @@
 {
   "username": "QA_RAS_hrbp_1",
-  "password": "Hrbp@123"
+  "password": "Hrbp@123",
+  "vaccancy_announcement_duration_in_days": "10",
+  "position_number": "00013022",
+  "primary_contact": "Eva Kastner",
+  "hr_manager": "Eva Kastner",
+  "hiring_manager": "Shruti Rastogi",
+  "contract_duration_months": "12",
+  "areas_of_education": "Accounting",
+  "areas_of_work": "Accounting and Auditing",
+  "tagline_for_every_child": "a hero"
 }
