@@ -10,10 +10,14 @@ test('login to ServiceNow', async () => {
     const browser = await chromium.launch({
       channel: 'chrome',
       headless: false,
-      timeout: 60000
+      timeout: 60000,
+      args: ['--start-maximized']
     });
 
-    const context = await browser.newContext();
+  const context = await browser.newContext({
+    viewport: null, // This disables the viewport setting
+    screen: { width: 1920, height: 1080 } // Typical full HD resolution
+  });
     const page = await context.newPage();
 
     try {
