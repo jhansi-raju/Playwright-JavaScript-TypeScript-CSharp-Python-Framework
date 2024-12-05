@@ -15,8 +15,7 @@ test('login to ServiceNow', async () => {
     });
 
   const context = await browser.newContext({
-    viewport: null, // This disables the viewport setting
-    screen: { width: 1920, height: 1080 } // Typical full HD resolution
+    viewport: null // Correct way to disable viewport
   });
     const page = await context.newPage();
 
