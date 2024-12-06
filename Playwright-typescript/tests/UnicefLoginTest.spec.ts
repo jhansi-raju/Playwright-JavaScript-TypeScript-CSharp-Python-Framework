@@ -1,5 +1,6 @@
 import { test, expect, chromium } from '@playwright/test';
 import * as fs from 'fs';
+import path from 'path';
 
 test('login to ServiceNow', async () => {
   test.setTimeout(300000);
@@ -99,8 +100,15 @@ test('login to ServiceNow', async () => {
         const fileInputSelector = 'input[type="file"]'; // Adjust selector if necessary
 
         console.log('Step 4: Upload the file...');
-        const filePath = 'D:\\Unicef_Project\\Unicef-Automation\\Playwright-typescript\\tests\\jhansi.doc';
+//         const filePath = 'D:\\Unicef_Project\\Unicef-Automation\\Playwright-typescript\\tests\\jhansi.doc';
+//         await page.setInputFiles(fileInputSelector, filePath);
+
+        const fileName = 'jhansi.doc';
+        const filePath = path.resolve(__dirname, fileName);
+        console.log(`Resolved file path: ${filePath}`);
         await page.setInputFiles(fileInputSelector, filePath);
+
+        // Wait for a few seconds to ensure the file upload completes
         await page.waitForTimeout(7000);
         console.log('File upload completed successfully.');
 
