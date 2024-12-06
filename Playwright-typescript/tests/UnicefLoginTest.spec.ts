@@ -74,6 +74,15 @@ test('login to ServiceNow', async () => {
 
         await page.fill('input[name="position_number"]', testData.position_number);
         await page.waitForTimeout(1000);
+
+        const positionAlreadyExistsXPath = '//div[contains(text(), "There is already an active request/draft for this position number.")]';
+        await page.waitForSelector(positionAlreadyExistsXPath, { timeout: 10000 });
+        const isVisible = await page.locator(positionAlreadyExistsXPath).isVisible();
+
+        if (isVisible) {
+            throw new Error('Position already exists. Cannot create multiple requests.');
+        }
+
         console.log('Step: Clicking the "Contacts" label...');
         const labelSelector = '//label[contains(@class, "accordion-label") and @id="contacts"]';
         await page.click(labelSelector);
