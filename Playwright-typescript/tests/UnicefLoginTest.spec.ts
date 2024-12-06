@@ -20,7 +20,17 @@ test('login to ServiceNow', async () => {
   // Loop through the test data for multiple login attempts
 
         // Step 1: Navigate to the login page
-        await page.goto(config.test, { waitUntil: 'domcontentloaded' });
+
+        if(config.env === 'test'){
+          await page.goto(config.test, { waitUntil: 'domcontentloaded' });
+          console.log("TEST env picked...")
+        }else if(config.env === 'dev'){
+          await page.goto(config.dev, { waitUntil: 'domcontentloaded' });
+          console.log("DEV env picked...")
+        }
+        else{}
+
+        //await page.goto(config.test, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(1000);  // Optional: you may remove this as it might not be needed
 
         await expect(page.locator('input[name="username"]')).toBeVisible({ timeout: 10000 });

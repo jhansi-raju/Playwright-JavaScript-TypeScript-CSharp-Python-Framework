@@ -2,5 +2,6 @@
   "username": "QA_RAS_hrbp_1",
   "password": "Hrbp@123",
   "test": "https://uniceftest.service-now.com/mp\n",
-  "dev": "https://unicefdev.service-now.com/mp\n"
+  "dev": "https://unicefdev.service-now.com/mp\n",
+  "env": "test"
 }
