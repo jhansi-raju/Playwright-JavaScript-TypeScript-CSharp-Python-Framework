@@ -3,10 +3,8 @@ import * as fs from 'fs';
 
 test('login to ServiceNow', async () => {
   test.setTimeout(300000);
+  const config =  JSON.parse(fs.readFileSync('config.json', 'utf8'));
   const testDataArray = JSON.parse(fs.readFileSync('TestData.json', 'utf8'));
-
-  // Loop through the test data for multiple login attempts
-  for (const testData of testDataArray) {
     const browser = await chromium.launch({
       channel: 'chrome',
       headless: false,
@@ -18,22 +16,27 @@ test('login to ServiceNow', async () => {
     viewport: null // Correct way to disable viewport
   });
     const page = await context.newPage();
+  // Loop through the test data for multiple login attempts
+
+        // Step 1: Navigate to the login page
+        await page.goto(config.test, { waitUntil: 'domcontentloaded' });
+        await page.waitForTimeout(1000);  // Optional: you may remove this as it might not be needed
+
+        await expect(page.locator('input[name="username"]')).toBeVisible({ timeout: 10000 });
+        await page.fill('input[name="username"]', config.username);
+        await page.waitForTimeout(1000);
+
+        await expect(page.locator('input[name="password"]')).toBeVisible({ timeout: 10000 });
+        await page.fill('input[name="password"]', config.password);
+        await page.waitForTimeout(1000);
+
+        await page.click('button[type="submit"]');
+        await page.waitForTimeout(3000); // Added a longer wait for the login process to complete
+
+  for (const testData of testDataArray) {
+
 
     try {
-      // Step 1: Navigate to the login page
-      await page.goto('https://uniceftest.service-now.com/mp', { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(1000);  // Optional: you may remove this as it might not be needed
-
-      await expect(page.locator('input[name="username"]')).toBeVisible({ timeout: 10000 });
-      await page.fill('input[name="username"]', testData.username);
-      await page.waitForTimeout(1000);
-
-      await expect(page.locator('input[name="password"]')).toBeVisible({ timeout: 10000 });
-      await page.fill('input[name="password"]', testData.password);
-      await page.waitForTimeout(1000);
-
-      await page.click('button[type="submit"]');
-      await page.waitForTimeout(3000); // Added a longer wait for the login process to complete
 
         await page.waitForSelector('//span[text()="Job Positions"]', { timeout: 20000 });
         await page.waitForTimeout(1000);
@@ -67,16 +70,16 @@ test('login to ServiceNow', async () => {
         console.log('"Contacts" label clicked successfully.');
 
         await page.click('//*[@id="s2id_sp_formfield_hrbp"]/a/span[2]/b');
-        await page.fill('//*[@id="s2id_autogen19_search"]', testData.primary_contact);
+        await page.fill('//label[contains(text(), "Primary Selection Support")]//following-sibling::input', testData.primary_contact);
         await page.click(`//div[text()="${testData.primary_contact}"]`);
         console.log('Clicked on primary_contact');
 
         await page.click('//*[@id="s2id_sp_formfield_hr_representative"]/a/span[2]/b');
-        await page.fill('//*[@id="s2id_autogen21_search"]', testData.hr_manager);
+        await page.fill('//label[contains(text(), "HR Representative")]//following-sibling::input', testData.hr_manager);
         await page.click(`//div[text()="${testData.hr_manager}"]`);
 
         await page.click('//*[@id="s2id_sp_formfield_hiring_manager"]/a/span[2]/b');
-        await page.fill('//*[@id="s2id_autogen22_search"]', testData.hiring_manager);
+        await page.fill('//label[contains(text(), "Hiring manager")]//following-sibling::input', testData.hiring_manager);
         await page.click(`//div[text()="${testData.hiring_manager}"]`);
         await page.waitForTimeout(7000);
 
@@ -175,13 +178,15 @@ test('login to ServiceNow', async () => {
         // Wait for the element to be present and extract its text content
         const jprNumberText = await page.textContent(JPR_NUMBER);
         console.log('Extracted JPR Number:', jprNumberText);
+        await page.waitForTimeout(5000);
     } catch (error) {
       console.error(`Error during login for ${testData.username}:`, error);
-    } finally {
-      if (browser) {
-        console.log(`Closing browser for position: ${testData.position_number}`);
-        await browser.close();
-      }
     }
+//     finally {
+//       if (browser) {
+//         console.log(`Closing browser for position: ${testData.position_number}`);
+//         await browser.close();
+//       }
+//     }
   }
 });
