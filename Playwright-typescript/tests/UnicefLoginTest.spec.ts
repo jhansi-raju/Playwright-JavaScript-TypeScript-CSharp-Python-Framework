@@ -2,6 +2,29 @@ import { test, expect, chromium } from '@playwright/test';
 import * as fs from 'fs';
 import path from 'path';
 
+function saveDataToFile(positionNumber: string, jprNumberText: string) {
+  const outputFile = path.resolve(__dirname, 'test_results.json');
+  const result = { positionNumber, jprNumberText, timestamp: new Date().toISOString() };
+
+  try {
+    // Check if the file exists
+    if (fs.existsSync(outputFile)) {
+      // Append to the existing file
+      const fileData = fs.readFileSync(outputFile, 'utf8');
+      const jsonData = JSON.parse(fileData);
+      jsonData.push(result);
+      fs.writeFileSync(outputFile, JSON.stringify(jsonData, null, 2));
+    } else {
+      // Create a new file with the data
+      fs.writeFileSync(outputFile, JSON.stringify([result], null, 2));
+    }
+    console.log('Successfully saved data to file:', result);
+  } catch (error) {
+    console.error('Error saving data to file:', error);
+  }
+}
+
+
 test('login to ServiceNow', async () => {
   test.setTimeout(300000);
   const config =  JSON.parse(fs.readFileSync('config.json', 'utf8'));
@@ -74,14 +97,29 @@ test('login to ServiceNow', async () => {
 
         await page.fill('input[name="position_number"]', testData.position_number);
         await page.waitForTimeout(1000);
+        await page.keyboard.press('Tab');
+        await page.waitForTimeout(10000);
+       const positionAlreadyExistsXPath = '//div[contains(text(), "There is already an active request/draft for this position number.")]';
+        console.log('Checking if "Position already exists" message is present...');
+        const elementHandle = await page.$(positionAlreadyExistsXPath);
 
-        const positionAlreadyExistsXPath = '//div[contains(text(), "There is already an active request/draft for this position number.")]';
-        await page.waitForSelector(positionAlreadyExistsXPath, { timeout: 10000 });
-        const isVisible = await page.locator(positionAlreadyExistsXPath).isVisible();
-
-        if (isVisible) {
-            throw new Error('Position already exists. Cannot create multiple requests.');
+        if (!elementHandle) {
+            console.log('"Position already exists" message is not present. Continuing the flow...');
+        } else {
+            const isVisible = await elementHandle.isVisible();
+            console.log(`Element visibility: ${isVisible}`);
+            if (isVisible) {
+                console.error('Error: Position already exists. Closing the browser...');
+                await browser.close();
+                process.exit(1);
+            } else {
+                console.log('"Position already exists" element is not visible. Continuing...');
+            }
         }
+
+        // Step 7: Continue the flow if no error
+        console.log('No issues detected. Proceeding with further steps...');
+
 
         console.log('Step: Clicking the "Contacts" label...');
         const labelSelector = '//label[contains(@class, "accordion-label") and @id="contacts"]';
@@ -205,6 +243,8 @@ test('login to ServiceNow', async () => {
         // Wait for the element to be present and extract its text content
         const jprNumberText = await page.textContent(JPR_NUMBER);
         console.log('Extracted JPR Number:', jprNumberText);
+
+        saveDataToFile(testData.position_number, jprNumberText);
         await page.waitForTimeout(5000);
     } catch (error) {
       console.error(`Error during login for ${testData.username}:`, error);
