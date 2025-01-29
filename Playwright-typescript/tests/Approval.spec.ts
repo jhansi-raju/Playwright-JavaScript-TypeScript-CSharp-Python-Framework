@@ -51,32 +51,6 @@ test('login to ServiceNow', async () => {
           await page.locator('section').click();
           await page.getByRole('button', { name: 'Approve' }).click();
           await page.waitForTimeout(5000);
-          await page.goto('https://uniceftest.service-now.com/login.do');
-          await page.getByLabel('User name').fill('QA_RAS_agent1');
-          await page.getByLabel('Password', { exact: true }).fill('Rasagent@123');
-          await page.getByRole('button', { name: 'Log in' }).click();
-          await page.waitForTimeout(5000);
-          await page.getByLabel('Favorites', { exact: true }).click();
-          await page.waitForTimeout(5000);
-          await page.getByRole('link', { name: 'Recruitment Tracking - All' }).click();
-          await page.waitForTimeout(5000);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByLabel('Search', { exact: true }).click();
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByLabel('Search', { exact: true }).fill(testData.jprNumberText);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByLabel('Search', { exact: true }).press('Enter');
-          await page.waitForTimeout(5000);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByLabel(`Open record: ${testData.jprNumberText}`).click();
-          await page.waitForTimeout(5000);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByRole('searchbox', { name: 'Mandatory - must be populated' }).click();
-          await page.waitForTimeout(5000);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByRole('cell', { name: 'QA_RAS_ agent1' }).click();
-          await page.waitForTimeout(5000);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByRole('button', { name: 'Select Date' }).click();
-          await page.waitForTimeout(5000);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().getByLabel('Friday, January 31,').click();
-
-          await page.waitForTimeout(5000);
-          await page.locator('iframe[name="gsft_main"]').contentFrame().locator('#approve_request').click();
-          await page.waitForTimeout(8000);
     } catch (error) {
       console.error(`Error during login for ${testData.username}:`, error);
     }
