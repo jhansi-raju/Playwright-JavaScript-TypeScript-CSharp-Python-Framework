@@ -7,9 +7,13 @@ export default defineConfig({
             testMatch: 'UnicefLoginTest.spec.ts',
         },
         {
-            name: 'ApprovalAndPublish',
-            testMatch: 'ApprovalAndPublish.spec.ts',
+            name: 'Approval',
+            testMatch: 'Approval.spec.ts',
         },
+                {
+                    name: 'Publish',
+                    testMatch: 'Publish.spec.ts',
+                },
     ],
     workers: 1, // Ensure tests run sequentially
 });
